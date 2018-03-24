@@ -1,8 +1,11 @@
 var app = require('express')();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
+let moment = require('moment');
 
 let tc = 0;
+
+console.log(moment().format('DD MMM YYYY hh mm ss'));
 
 io.on('connection', function(socket) {
 	tc++;
