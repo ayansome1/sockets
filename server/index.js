@@ -1,7 +1,71 @@
-var app = require('express')();
-var server = require('http').createServer(app);
-var io = require('socket.io')(server);
+let express = require('express');
+let http = require('http');
+let app = express();
+let server = http.createServer(app);
+let io = require('socket.io')(server);
 let moment = require('moment');
+let connInfo = config.sqlconn;
+connInfo.multipleStatements = true;
+
+if (!process.env.NODE_ENV) {
+    app.use(require('morgan')('dev'));
+}
+
+function checkIfAccessTokenValid(accessToken) {
+	let deferred = q.defer();
+	let connection = mysql.createConnection(connInfo);
+    let query = "Select * from users where access_token = ? ;";
+    connection.query(query, [accessToken], (err, result) => {
+        if (err) {
+            deferred.reject(err);
+        }
+        
+        else if (_.isEmpty(result)) {
+
+            deferred.resolve({isValidUser: false});
+        }
+        else{
+            deferred.resolve({user: result[0], isValidUser: true});
+
+        }
+
+    });
+
+    connection.end();
+    return deferred.promise;
+}
+
+function auth(req,res,next) {
+
+	let accessToken = req.get('access-token');
+	if(accessToken) {
+		checkIfAccessTokenValid(accessToken).then(function(data){
+
+
+			if(data.isValidUser){
+				req.user = data.user;
+
+				next();				
+			}
+			else{
+				res.status(401).send();
+			}
+		},function(err){
+            winston.error(" Error in checking accessToken validity" +  err);
+	        return res.status(500).send();
+		});
+	}
+	else{
+		res.status(401).send();
+	}
+
+
+}
+
+
+
+
+
 
 let tc = 0;
 

@@ -1,0 +1,15 @@
+{
+	"sqlconn": {
+		"connectionLimit": 10,
+		"host": "127.0.0.1",
+		"user": "root",
+		"password": "root",
+		"database": "silly",
+		"port": 3306,
+		"multipleStatements": true
+	},
+	"silly": {
+		"port": 9080,
+		"corsorigin": "http://localhost"
+	}
+}
